@@ -60,7 +60,7 @@ export default defineComponent({
     })
 
     function addTodo() {
-      axios.post('https://vue3todoapi/api/store-todo', {
+      axios.post(process.env.VUE_APP_BASE_API_URL + '/store-todo', {
         text: state.todoText
       })
       .then(() => {
@@ -71,14 +71,14 @@ export default defineComponent({
     }
 
     function markAsDone(todo) {
-      axios.put('https://vue3todoapi/api/complete-todo', {
+      axios.put(process.env.VUE_APP_BASE_API_URL + '/complete-todo', {
         id: todo.id
       })
       .then(() => getTodos())
     }
     
     function markAsUndone(todo) {
-      axios.put('https://vue3todoapi/api/undone-todo', {
+      axios.put(process.env.VUE_APP_BASE_API_URL + '/undone-todo', {
         id: todo.id
       })
       .then(() => getTodos())
@@ -87,14 +87,14 @@ export default defineComponent({
     function removeTodo(todo) {
       if(!confirm('Are you sure?')) return;
 
-      axios.post('https://vue3todoapi/api/delete-todo', {
+      axios.post(process.env.VUE_APP_BASE_API_URL + '/delete-todo', {
         id: todo.id
       })
       .then(() => getTodos())
     }
 
     function getTodos() {
-      axios.get('https://vue3todoapi/api/todos')
+      axios.get(process.env.VUE_APP_BASE_API_URL + '/todos')
       .then(response => {
         state.todos = response.data
       })
