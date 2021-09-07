@@ -6,28 +6,28 @@
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-6 space-y-4 px-1"
              style="height: 500px">
-          <div v-for="(todo, index) in todos"
+          <div v-for="(todo, index) in state.todos"
             :key="index"
             class="p-8 bg-white shadow-md rounded flex items-center justify-between"
             :class="{'bg-green-200': todo.done}"
           >
             <div>
               <div>{{ todo.text }}</div>
-              <div class="text-gray-500 text-sm">{{ todo.createdAt.toString() }}</div>
+              <div class="text-gray-500 text-sm">{{ todo.created_at }}</div>
             </div>
             <div class="space-x-2">
               <button class="px-2 text-red-600"
-              @click="removeTodo(index)"
+              @click="removeTodo(todo)"
                       title="Remove todo">&times;</button>
               <button v-if="!todo.done" class="px-2 text-green-600"
-                      @click="markAsDone(index)"
+                      @click="markAsDone(todo)"
                       title="Mark as done">&check;</button>
               <button v-else class="px-2 text-orange-600"
-                      @click="markAsUndone(index)"
+                      @click="markAsUndone(todo)"
                       title="Mark as undone">&#8630;</button>
             </div>
           </div>
-          <div v-if="todos.length === 0" class="px-8 py-16 bg-white text-gray-700 shadow-md rounded text-sm">
+          <div v-if="state.todos.length === 0" class="px-8 py-16 bg-white text-gray-700 shadow-md rounded text-sm">
             You dont have any task to do.
           </div>
         </div>
@@ -37,7 +37,7 @@
             <h2 class="text-xl">Add a todo</h2>
             <!-- don't need todoText.value, value stands automatically -->
             <input
-              v-model="todoText"
+              v-model="state.todoText"
               @keydown.enter="addTodo"
               type="text" class="p-2 mt-4 border rounded w-full">
           </div>
@@ -48,41 +48,62 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import axios from 'axios'
+import { defineComponent } from 'vue'
 import { reactive } from 'vue'
 
 export default defineComponent({
   setup() {
-    const todos = reactive([])
-    const todoText = ref("") // const todoText = {value: ""}
+    const state = reactive({
+      todos: [],
+      todoText: ''
+    })
 
     function addTodo() {
-      todos.unshift({
-        text: todoText.value,
-        createdAt: new Date(),
-        done: false
+      axios.post('https://vue3todoapi/api/store-todo', {
+        text: state.todoText
       })
+      .then(() => {
+        state.todoText = ''
 
-      todoText.value = ''
+        getTodos()
+      })
     }
 
-    function markAsDone(index) {
-      todos[index].done = true
+    function markAsDone(todo) {
+      axios.put('https://vue3todoapi/api/complete-todo', {
+        id: todo.id
+      })
+      .then(() => getTodos())
     }
     
-    function markAsUndone(index) {
-      todos[index].done = false
+    function markAsUndone(todo) {
+      axios.put('https://vue3todoapi/api/undone-todo', {
+        id: todo.id
+      })
+      .then(() => getTodos())
     }
 
-    function removeTodo(index) {
+    function removeTodo(todo) {
       if(!confirm('Are you sure?')) return;
 
-      todos.splice(index, 1)
+      axios.post('https://vue3todoapi/api/delete-todo', {
+        id: todo.id
+      })
+      .then(() => getTodos())
     }
 
+    function getTodos() {
+      axios.get('https://vue3todoapi/api/todos')
+      .then(response => {
+        state.todos = response.data
+      })
+    }
+
+    getTodos()
+
     return {
-      todos,
-      todoText,
+      state,
       addTodo,
       markAsDone,
       markAsUndone,
