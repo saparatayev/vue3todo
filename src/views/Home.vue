@@ -15,11 +15,10 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { useImageUpload } from '@/composables/useImageUpload.js'
 export default {
   setup() {
-    let imageFile = ref("")
-    let imageUrl = ref("")
+    let {onImageChange, imageUrl, imageFile} = useImageUpload()
 
     function onImageChange(e) {
       let files = e.target.files || e.dataTransfer.files
