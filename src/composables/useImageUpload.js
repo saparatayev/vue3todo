@@ -25,7 +25,6 @@ export function useImageUpload() {
   
         reader.onload = () => {
           imageUrl.value = reader.result
-          console.log(imageUrl.value)
         };
     })
 
